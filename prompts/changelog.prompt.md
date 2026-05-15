@@ -7,9 +7,9 @@ description: Draft a new GitHub Copilot IDE changelog entry (JetBrains, Eclipse,
 
 Use the `changelog_skill` to scaffold a new changelog entry for this repository.
 
-> **Install location:** copy this file to `.github/prompts/changelog.prompt.md`
-> in the repo where you want the slash command to be available.
-> The relative paths below assume the skill lives at `.github/skills/changelog_skill/`.
+> Install location: this file lives at `.github/prompts/changelog.prompt.md`.
+> The relative paths below assume the skill is installed at `.github/skills/changelog_skill/`.
+> See the skill's [README.md](../skills/changelog_skill/README.md) for the install one-liner.
 
 ## Inputs (from this invocation)
 

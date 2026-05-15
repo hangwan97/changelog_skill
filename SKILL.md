@@ -10,32 +10,21 @@ Generates a new changelog entry for the GitHub Copilot IDE extensions (JetBrains
 
 ## Quick start (for contributors who just cloned this repo)
 
-This skill works in two modes — pick whichever you prefer:
+This skill ships with a ready-to-use `/changelog` slash command.
 
-### A. Natural language (always available)
+In Copilot Chat, you can either:
 
-Once the skill is installed at `.github/skills/changelog_skill/`, just ask in
-GitHub Copilot Chat:
+- Type **`/changelog`** (with optional inline args), e.g.
+  `/changelog Custom Agent for Xcode now GA, releasing 2026-05-20`, or
+- Ask in plain English:
+  > create a new changelog for *Custom Agent for Xcode now GA, releasing 2026-05-20*
 
-> create a new changelog for *Custom Agent for Xcode now GA, releasing 2026-05-20*
+Either way, you'll be asked a few quick questions (title, date, target IDE(s),
+optional context), then the new file is written at the workspace root.
 
-Copilot picks this skill up via its `description` field and runs the interview.
-
-### B. `/changelog` slash command (optional, opt-in)
-
-A ready-to-use prompt file ships at [prompts/changelog.prompt.md](./prompts/changelog.prompt.md).
-Copy it into the target repo's `.github/prompts/` folder:
-
-```bash
-mkdir -p .github/prompts
-cp .github/skills/changelog_skill/prompts/changelog.prompt.md .github/prompts/
-```
-
-Make sure VS Code setting `chat.promptFiles` is `true` (default in recent releases),
-then reload the window (`Cmd/Ctrl+Shift+P` → **Developer: Reload Window**).
-Type `/changelog` in Copilot Chat to invoke it.
-
-See [README.md](./README.md) for full install / update / uninstall instructions.
+If `/changelog` does not appear, reload the VS Code window
+(`Cmd/Ctrl+Shift+P` → **Developer: Reload Window**) and confirm the setting
+`chat.promptFiles` is `true`. Full install steps are in [README.md](./README.md).
 
 ## When to Use
 
