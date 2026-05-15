@@ -1,5 +1,5 @@
 ---
-name: changelog_skill
+name: changelog
 description: 'Draft a new GitHub Copilot IDE changelog entry (JetBrains, Eclipse, Xcode) for this repository. USE WHEN: the user asks to "create a changelog", "draft a release note", "write a new changelog entry", "announce a Copilot feature", or pastes raw release info that needs formatting. INTERVIEWS the user for title, release date, target product(s) (JetBrains / Eclipse / Xcode — multi-select), and optional main context, then produces the correctly named file (YYYY-MM-DD-Title.md), YAML frontmatter, and a body scaffolded with the standard sections (poster image, ✨ What''s new, body, 💬 Share your feedback with product-specific channels). DO NOT USE for: editing unrelated docs, generating product code, or writing changelogs for non-Copilot products.'
 argument-hint: '[title] [release-date YYYY-MM-DD]'
 ---
@@ -10,7 +10,7 @@ Generates a new changelog entry for the GitHub Copilot IDE extensions (JetBrains
 
 ## Quick start (for contributors who just cloned this repo)
 
-This skill ships with a ready-to-use `/changelog` slash command.
+This skill exposes itself as a `/changelog` slash command in VS Code Copilot Chat.
 
 In Copilot Chat, you can either:
 
@@ -23,10 +23,8 @@ Either way, you'll be asked a few quick questions (title, date, target IDE(s),
 optional context), then the new file is written at the workspace root.
 
 If `/changelog` does not appear, reload the VS Code window
-(`Cmd/Ctrl+Shift+P` → **Developer: Reload Window**) and confirm the setting
-`chat.promptFiles` is `true`. Full install steps (including how to copy
-[template/changelog.prompt.md.tmpl](./template/changelog.prompt.md.tmpl) into
-`.github/prompts/`) are in [README.md](./README.md).
+(`Cmd/Ctrl+Shift+P` → **Developer: Reload Window**). Full install steps are
+in [README.md](./README.md).
 
 ## When to Use
 
