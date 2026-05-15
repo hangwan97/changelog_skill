@@ -24,7 +24,9 @@ optional context), then the new file is written at the workspace root.
 
 If `/changelog` does not appear, reload the VS Code window
 (`Cmd/Ctrl+Shift+P` → **Developer: Reload Window**) and confirm the setting
-`chat.promptFiles` is `true`. Full install steps are in [README.md](./README.md).
+`chat.promptFiles` is `true`. Full install steps (including how to copy
+[template/changelog.prompt.md.tmpl](./template/changelog.prompt.md.tmpl) into
+`.github/prompts/`) are in [README.md](./README.md).
 
 ## When to Use
 
