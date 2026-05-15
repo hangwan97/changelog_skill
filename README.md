@@ -18,8 +18,12 @@ Copy-paste this one block:
 
 ```bash
 mkdir -p .github/skills
-git clone https://github.com/hangwan97/changelog_skill.git .github/skills/changelog_skill
+git clone https://github.com/hangwan97/changelog_skill.git .github/skills/changelog
 ```
+
+> Note: clone destination is `.github/skills/changelog` (no `_skill` suffix) so
+> the folder name matches the skill's `name: changelog` and the slash command
+> shows up as `/changelog`.
 
 That's it. Reload the VS Code window
 (`Cmd/Ctrl+Shift+P` → **Developer: Reload Window**) and you're ready to go.
@@ -53,13 +57,13 @@ then the new file is written at your repo root: `YYYY-MM-DD-<Title>.md`.
 ## Update
 
 ```bash
-cd .github/skills/changelog_skill && git pull
+cd .github/skills/changelog && git pull
 ```
 
 ## Uninstall
 
 ```bash
-rm -rf .github/skills/changelog_skill
+rm -rf .github/skills/changelog
 ```
 
 ## License

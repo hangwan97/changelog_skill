@@ -1,7 +1,7 @@
 ---
 name: changelog
-description: 'Draft a new GitHub Copilot IDE changelog entry (JetBrains, Eclipse, Xcode) for this repository. USE WHEN: the user asks to "create a changelog", "draft a release note", "write a new changelog entry", "announce a Copilot feature", or pastes raw release info that needs formatting. INTERVIEWS the user for title, release date, target product(s) (JetBrains / Eclipse / Xcode — multi-select), and optional main context, then produces the correctly named file (YYYY-MM-DD-Title.md), YAML frontmatter, and a body scaffolded with the standard sections (poster image, ✨ What''s new, body, 💬 Share your feedback with product-specific channels). DO NOT USE for: editing unrelated docs, generating product code, or writing changelogs for non-Copilot products.'
-argument-hint: '[title] [release-date YYYY-MM-DD]'
+description: 'Draft a new GitHub Copilot IDE changelog entry (JetBrains, Eclipse, Xcode) for this repository. USE WHEN: the user asks to "create a changelog", "draft a release note", "write a new changelog entry", "announce a Copilot feature", or pastes raw release info that needs formatting. INTERVIEWS the user for target product(s) (JetBrains / Eclipse / Xcode — multi-select), release date, and the main content/notes; then DERIVES the title from the content and produces the correctly named file (YYYY-MM-DD-Title.md), YAML frontmatter, and a body scaffolded with the standard sections (poster image, ✨ What''s new, body, 💬 Share your feedback with product-specific channels). DO NOT USE for: editing unrelated docs, generating product code, or writing changelogs for non-Copilot products.'
+argument-hint: '[release-date YYYY-MM-DD] [content]'
 ---
 
 # Changelog Skill
@@ -15,12 +15,13 @@ This skill exposes itself as a `/changelog` slash command in VS Code Copilot Cha
 In Copilot Chat, you can either:
 
 - Type **`/changelog`** (with optional inline args), e.g.
-  `/changelog Custom Agent for Xcode now GA, releasing 2026-05-20`, or
+  `/changelog 2026-05-20 Custom Agent for Xcode is now generally available...`, or
 - Ask in plain English:
-  > create a new changelog for *Custom Agent for Xcode now GA, releasing 2026-05-20*
+  > create a new changelog: Custom Agent for Xcode is now generally available, releasing 2026-05-20
 
-Either way, you'll be asked a few quick questions (title, date, target IDE(s),
-optional context), then the new file is written at the workspace root.
+Either way, you'll be asked three quick questions (target IDE(s), release date,
+and content). The skill **derives the title and filename for you** and writes
+the new file at the workspace root.
 
 If `/changelog` does not appear, reload the VS Code window
 (`Cmd/Ctrl+Shift+P` → **Developer: Reload Window**). Full install steps are
@@ -35,42 +36,66 @@ Trigger this skill whenever the user wants to:
 
 ## Inputs to Collect
 
-Use the `vscode_askQuestions` tool (one batched call) to gather the following from the user. **Do not skip this step** — even if the user provided some info up front, confirm what is missing.
+Use the `vscode_askQuestions` tool (one batched call) to gather the following from the user.
+**Ask exactly these three questions — nothing more.** Do NOT ask the user for a title;
+the skill derives the title from the content (see Step 1 below).
 
 | # | Field | Required | Notes |
 |---|-------|----------|-------|
-| 1 | **Title** | Yes | Full announcement headline. Title-case. May contain colons. Example: `Custom Agent for JetBrains, Eclipse, and Xcode now in public preview` |
+| 1 | **Product(s)** | Yes | Which IDE(s) this changelog covers. **Multi-select** from: `JetBrains`, `Eclipse`, `Xcode`. Drives the feedback-channel block and helps shape the derived title. Ask with `multiSelect: true`. |
 | 2 | **Release date** | Yes | `YYYY-MM-DD`. Default suggestion = today. |
-| 3 | **Product(s)** | Yes | Which IDE(s) this changelog covers. **Multi-select** from: `JetBrains`, `Eclipse`, `Xcode`. Drives the feedback-channel block and helps validate the title. Ask with `multiSelect: true` and the three options. |
-| 4 | **Main context** | Optional | Free-form notes: feature highlights, preview vs GA, links, screenshots. If empty, generate a sensible scaffold the user can fill in. |
+| 3 | **Content** | Yes | Free-form: feature description, highlights, bullet points, raw release notes, links, screenshots, preview vs GA, etc. The skill uses this both to write the body **and** to derive the title. |
 
-If the user already supplied any of these in the prompt, pre-fill that question's default and only ask about the remaining ones.
+If the user supplied any of these in the slash-command arguments, pre-fill the
+corresponding question and only ask for what is still missing.
 
 ### Question wording (suggested)
 
-- `title` — *"What is the title of this changelog?"*
-- `release-date` — *"What is the release date? (YYYY-MM-DD)"*
 - `product` — *"Which product(s) does this changelog cover?"* with `multiSelect: true` and options `JetBrains`, `Eclipse`, `Xcode`.
-- `main-context` — *"Any main context, highlights, or notes to include? (optional)"*
+- `release-date` — *"What is the release date? (YYYY-MM-DD)"*
+- `content` — *"What's the changelog about? Paste raw notes, bullets, or a short description — I'll derive the title and structure the body."*
 
 ## Output Procedure
 
-### Step 1 — Derive the filename
+### Step 1 — Derive the title from the content
+
+The user does **not** supply a title. Generate one from the **content** + **product(s)** answers.
+
+Rules:
+- **Title-case**, concise (target ~6–12 words).
+- Mention the **feature/capability** and a **release-phase signal** when present in the content
+  (e.g. "now in public preview", "is now generally available", "now GA", "new in GitHub Copilot in Eclipse").
+- Mention the **selected IDE(s)** in the order JetBrains → Eclipse → Xcode. If all three were selected,
+  use the form `for JetBrains, Eclipse, and Xcode`. For two, `for <A> and <B>`. For one, just `for <IDE>` or `in <IDE>`.
+- Match the tone of existing entries in this repo. Examples to mirror:
+  - `Custom Agent for JetBrains, Eclipse, and Xcode now in public preview`
+  - `Coding Agent for JetBrains IDE`
+  - `Agent Mode for JetBrains, Eclipse and Xcode is now generally available`
+  - `New Features in GitHub Copilot in Eclipse`
+- Do **not** include the date in the title.
+- Do **not** wrap the title in quotes when generating it (it's quoted later in the YAML frontmatter).
+
+Briefly show the derived title to the user (one line) before writing the file, so they can
+override it if it's off. Don't re-prompt unless they push back.
+
+### Step 2 — Derive the filename
 
 Pattern: `YYYY-MM-DD-<Title>.md`
 
 Rules (matching files already in this repo):
 - Use the release date verbatim (e.g. `2025-11-18`).
-- Keep the title's original casing and spaces. Do **not** slugify.
+- Keep the derived title's casing and spaces. Do **not** slugify.
 - Strip characters that are illegal on macOS/Windows filesystems: `/ \ : * ? " < > |`. Replace `:` with nothing or a hyphen as needed.
-- Save the file at the **workspace root** (same level as the existing `YYYY-MM-DD-*.md` entries), not inside `changelog_skill/`.
 
 Examples already in the repo:
 - `2025-11-18- Custom Agent for JetBrains, Eclipse, and Xcode now in public preview.md`
 - `2025-10-15- Coding Agent for JetBrains IDE.md`
 - `2025-09-03-New Features in GitHub Copilot in Eclipse.md`
 
-### Step 2 — Build the YAML frontmatter
+> Save the file at the **workspace root** (same level as the existing
+> `YYYY-MM-DD-*.md` entries), not inside `.github/skills/changelog/`.
+
+### Step 3 — Build the YAML frontmatter
 
 Always emit **all four** of these keys, in this order:
 
@@ -87,11 +112,14 @@ private: true             # REQUIRED — always present
 **`type` decision rule:**
 - `new-releases` → a brand new feature, public preview, or GA announcement.
 - `improvements` → a roll-up of enhancements / polish / bug fixes for an existing feature.
+  Infer this from the **content** answer (e.g. "performance improvements", "bug fixes",
+  "smarter, faster" → `improvements`; "public preview", "now generally available",
+  "introducing" → `new-releases`).
 
 **`private` rule:** Always include `private: true`. Do not omit it, even if the user does not mention drafts.
 **`labels` rule:** Always `labels: copilot`. Do not change or omit it.
 
-### Step 3 — Scaffold the body
+### Step 4 — Scaffold the body
 
 Use the canonical structure below (and the full template at [assets/changelog-template.md](./assets/changelog-template.md)):
 
@@ -145,14 +173,15 @@ Your feedback drives our roadmap. Let us know how this is working for you by usi
     - Xcode [GitHub Copilot in Xcode feedback repository](https://github.com/github/CopilotForXcode/issues)
 ```
 
-### Step 4 — Create the file
+### Step 5 — Create the file
 
-Create the new `.md` file at the workspace root using the file-creation tool. Do **not** print the entire draft into chat — just confirm the path and offer a short summary of what was generated and what `//TODO:` placeholders the user should fill in.
+Create the new `.md` file at the workspace root using the file-creation tool. Do **not** print the entire draft into chat — just confirm the **derived title**, the file path, and offer a short summary of what was generated and what `//TODO:` placeholders the user should fill in.
 
 ## Quality Checklist (run before finishing)
 
+- [ ] Title was **derived** by the skill (not asked from the user) and shown back for confirmation.
 - [ ] Filename matches `YYYY-MM-DD-<Title>.md` and lives at the workspace root.
-- [ ] Frontmatter contains **all four required keys**: `title`, `labels: copilot`, `date`, `type`, **and** `private: true`.
+- [ ] Frontmatter contains **all five required keys**: `title`, `labels: copilot`, `date`, `type`, **and** `private: true`.
 - [ ] `labels` is exactly `copilot` and `private` is exactly `true` — never omitted.
 - [ ] Title in frontmatter is quoted if it contains `:` or other YAML-sensitive characters.
 - [ ] Body has the three required headings: `## ✨ What's new`, `## 🛠 Try it out` (when applicable), `## 💬 Share your feedback`.
